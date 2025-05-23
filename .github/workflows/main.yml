@@ -1,0 +1,36 @@
+name: Generate SBOM (CycloneDX JSON)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  generate-sbom:
+    runs-on: ubuntu-latest
+    name: Generate CycloneDX SBOM in JSON
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install CycloneDX CLI
+        run: npm install -g @cyclonedx/bom
+
+      - name: Generate SBOM in JSON format
+        run: cyclonedx-bom -o sbom.json -e --output-format json
+
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-json
+          path: sbom.json
